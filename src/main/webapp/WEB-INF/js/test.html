@@ -1,0 +1,57 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SPARQL DEMO</title>
+    <script src="test.js"></script>
+    <script>
+
+        var $ = function(id){
+                return document.getElementById(id);
+            },
+            sparql = new SPARQLWrapper("http://dbpedia.org/sparql"),
+            results = [];
+
+        function getInfo(name){
+            name = name.replace(/\s/g, "_");
+//            var command = "prefix foaf: <http://xmlns.com/foaf/0.1/> "
+//                + "select distinct ?url ?alma ?comment "
+//                + "where { "
+//                + "?s foaf:name ?sname . "
+//                + "?sname bif:contains '" + name + "'. "
+//                + "?s foaf:depiction ?url . "
+//                + "?s dbpedia-owl:wikiPageExternalLink ?alma . "
+//                + "?s rdfs:comment ?comment . "
+//                + "} "
+//                + "limit 100";
+            var command = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+            +"SELECT DISTINCT ?x1 WHERE {?x0 rdf:type foaf:Person. ?x0 rdfs:label \"Jiang Zemin\"@en. ?x0 rdfs:comment ?x1.FILTER (langMatches(lang(?x1), \"EN\")) }";
+            sparql.setQuery(command);
+            sparql.query(function(json){
+                showInfo((eval("(" + json + ")")).results.bindings);
+            });
+        }
+
+        function showInfo(results){
+            var text = "";
+            if(results.length !== 0){
+                for(var i = 0; i < results.length; i++){
+                    text += "<p>" + results[i].x1.value + "</p><br /><br /><br />";
+                    $("result").innerHTML = text;
+                }
+            }else{
+                $("result").innerHTML = "没有任何相关信息！";
+            }
+
+        }
+
+    </script>
+</head>
+<body>
+<p>目前只支持英文查询。</p>
+<input type="text" id="name"/>
+<input type="button" onclick="getInfo(document.getElementById('name').value);" value="Wiki Search" />
+<div id="result"></div>
+
+
+</body>
+</html>

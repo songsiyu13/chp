@@ -1,0 +1,7 @@
+grant simplePrincipal admin {
+    permission other.MyPermission "secret", "allowed";
+};
+
+grant simplePrincipal user {
+    permission other.MyPermission "secret", "forbidden";
+};

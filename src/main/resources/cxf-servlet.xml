@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xsi:schemaLocation=" http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://cxf.apache.org/jaxws
+       http://cxf.apache.org/schemas/jaxws.xsd http://cxf.apache.org/jaxrs
+    http://cxf.apache.org/schemas/jaxrs.xsd">
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+    <import resource="spring-mvc.xml"/>
+
+
+    <!-- 有点儿类似JDK的形式  参数address是访问地址  implementor是实现者(最开始测试可以使用服务类com.itcast.ws.CXFService，但是后面和spring配置文件整合的时候就㤇使用bean的#ID了)-->
+
+    <jaxws:endpoint implementor="#cxfServices" address="/hello"/>
+
+    <jaxrs:server id="rs1" address="/rs">
+        <jaxrs:serviceBeans>
+            <ref bean="restSample" />
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+        </jaxrs:providers>
+    </jaxrs:server>
+</beans>

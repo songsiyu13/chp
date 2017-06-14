@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="userDetailsService">
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <security:http security="none" pattern="/" />
+    <security:http security="none" pattern="/signin" />
+    <security:http security="none" pattern="/picture/**" />
+    <security:http security="none" pattern="/js/**" />
+    <security:http security="none" pattern="/chat" />
+    <security:http auto-config="true">
+        <security:form-login login-page="/signin"
+                             login-processing-url="/login.do" username-parameter="username"
+                             password-parameter="password"  default-target-url="/message"/>
+        <security:intercept-url pattern="/**" access="ROLE_USER" />
+        <security:intercept-url pattern="/admin/**" access="ROLE_ADMIN" />
+    </security:http>
+
+    <bean id="userDetailsService" class="com.security.BookstoreUserDetailsService">
+        
+    </bean>
+
+</beans>

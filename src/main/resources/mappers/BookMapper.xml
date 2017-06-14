@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.BookDao">
+	
+	<select id="findByUserID" parameterType="int" resultType="Book">
+		select * from book where bookID = #{bookID}
+	</select>
+	
+	<resultMap type="Book" id="bookMap">
+		<id column="bookID" property="bookID"/>
+		<result column="bookName" property="bookName"/>
+		<result column="bookPrice" property="price"/>
+		<result column="category" property="category"/>
+		<!-- <association property="" column=""></association> -->
+	</resultMap>
+
+	<select id="findAll" resultMap="bookMap">
+		select * from book
+	</select>
+	
+</mapper>

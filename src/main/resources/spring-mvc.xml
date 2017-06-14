@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+                        http://www.springframework.org/schema/mvc
+                        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+                        http://www.springframework.org/schema/aop
+                        http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+                         http://www.springframework.org/schema/util
+                         http://www.springframework.org/schema/util/spring-util.xsd
+                       ">
+
+    <!-- 自动扫描  @Controller-->
+
+    <mvc:annotation-driven/>
+
+    <mvc:resources mapping="/js/**" location="/WEB-INF/js/"/>
+    <mvc:resources mapping="/admin/**" location="/WEB-INF/admin/"/>
+    <mvc:resources mapping="/picture/**" location="/WEB-INF/picture/"/>
+
+    <context:component-scan base-package="com" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+
+    <bean id="cxfServices" class="com.controller.CXFService"/>
+
+
+    <!-- 定义跳转的文件的前后缀 ，视图模式配置 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property value="org.springframework.web.servlet.view.JstlView" name="viewClass"/>
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <bean id="myAdvice" class="com.aop.MyAdvice" />
+
+    <aop:config>
+        <!-- 定义切面 引用通知的bean -->
+        <aop:aspect id="my-aspect1" ref="myAdvice">
+            <!-- 设置切入点 -->
+            <aop:pointcut id="pointcut1" expression="execution(* com.controller.Welcome.*(..))" />
+            <!--指定before通知方法为,myAdvice.beforeShow()，引用切入点pointcut1 -->
+            <aop:before method="beforeShow" pointcut-ref="pointcut1" />
+            <!--&lt;!&ndash;指定after通知方法为,myAdvice.afterShow()，引用切入点pointcut1 &ndash;&gt;-->
+            <!--<aop:after method="afterShow" pointcut-ref="pointcut1" />-->
+            <!--&lt;!&ndash;指定afterReturn通知方法为,myAdvice.afterReturnShow()，引用切入点pointcut1 &ndash;&gt;-->
+            <!--<aop:after-returning method="afterReturnShow" pointcut-ref="pointcut1" />-->
+            <!--&lt;!&ndash;指定afterThrowing通知方法为,myAdvice.afterThrowingShow()，引用切入点pointcut1 &ndash;&gt;-->
+            <!--<aop:after-throwing method="afterThrowingShow" pointcut-ref="pointcut1" />-->
+            <!--&lt;!&ndash;指定around通知方法为,myAdvice.aroundShow()，引用切入点pointcut1 &ndash;&gt;-->
+            <!--<aop:around method="aroundShow" pointcut-ref="pointcut1" />-->
+        </aop:aspect>
+    </aop:config>
+
+    <bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver"> <!-- 必须将区域解析器的Bean名称设置为localeResolver，这样DispatcherServlet才能自动侦测到它。请注意，每DispatcherServlet只能注册一个区域解析器。-->
+        <property name="defaultLocale" value="zh"/>
+    </bean>
+    <bean id="cookieLocaleResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+        <property name="cookieName" value="clientlanguage"/>
+        <property name="cookieMaxAge" value="94608000"/>
+        <property name="defaultLocale" value="en" />
+    </bean>
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <!-- 国际化信息所在的文件名 -->
+        <property name="basenames">
+            <list>
+                <value>proper/message</value>
+            </list>
+        </property>
+        <!-- 如果在国际化资源文件中找不到对应代码的信息，就用这个代码作为名称  -->
+        <property name="useCodeAsDefaultMessage" value="true" />
+    </bean>
+
+    <mvc:interceptors>
+        <!--国际化资源切换（根据请求参数中的locale参数自动切换）-->
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <ref bean="localeChangeInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!--lucene-->
+
+    <util:constant id="LUCENE_VERSION" static-field="org.apache.lucene.util.Version.LUCENE_48"/>
+
+    <!--配置索引位置-->
+    <bean id="directory" class="org.apache.lucene.store.RAMDirectory">
+
+    </bean>
+
+    <!--分词-->
+    <bean id="analyzer" class="org.wltea.analyzer.lucene.IKAnalyzer">
+        <constructor-arg value="true"/>
+    </bean>
+
+    <bean id="indexWriterConfig" class="org.apache.lucene.index.IndexWriterConfig">
+        <constructor-arg name="matchVersion" ref="LUCENE_VERSION" />
+        <constructor-arg name="analyzer" ref="analyzer"/>
+    </bean>
+
+    <bean id="indexWriter" class="org.apache.lucene.index.IndexWriter">
+        <constructor-arg name="d" ref="directory" />
+        <constructor-arg name="conf" ref="indexWriterConfig" />
+    </bean>
+</beans>
